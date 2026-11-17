@@ -1,0 +1,78 @@
+# A Fount Cloud runner enclave. The coordinator pins this repository with
+# --runner-repo: it takes jobs only to an enclave measured from a release here.
+# The images and the broker's code: github.com/fount-labs/fount-broker.
+#
+# Placeholders: both image digests (fount-broker's release workflow reports
+# them for each tag) and the harness pin.
+cvm-version: 0.14.17 # https://github.com/tinfoilsh/cvmimage/releases/latest, no `v`
+cpus: 8
+memory: 32768
+
+# The link's per-boot key (internal/link). The coordinator's enclave declares
+# the same id for its own end.
+attested-keys:
+  - id: fount-link
+    key: ed25519
+
+networks:
+  broker-out:
+    egress: allowlist
+    allow:
+      - api.fount.sh # the proxy: inference with the job's minted license
+      - websearch.tinfoil.sh
+      - ghcr.io # the harness pull
+      - pkg-containers.githubusercontent.com
+      # Checking the coordinator needs no hosts: a V3 document carries its
+      # own collateral (Sigstore bundles, AMD VCEK and CRL, Intel PCS), and
+      # tinfoil-go verifies it offline against embedded roots.
+
+containers:
+  - name: broker
+    image: "ghcr.io/fount-labs/fount-broker/broker@sha256:PLACEHOLDER_DIGEST"
+    networks: [broker-out]
+    keys: [fount-link]
+    # The link sends this enclave's document; the coordinator checks it.
+    attestation: true
+    restart: always
+    command: ["runner", "--listen", "0.0.0.0:7400"]
+    volumes:
+      - harness-blobs:/harness-blobs
+      - sockets:/sockets
+    env:
+      - FOUNT_COORDINATOR_REPO: "fount-labs/fount-cloud-coordinator" # TODO: the coordinator's config repo
+      - FOUNT_HARNESS_IMAGE: "ghcr.io/zeke-02/fount-runner@sha256:PLACEHOLDER_HARNESS"
+    secrets:
+      # Read-only, for the private harness (fount's runner-image workflow
+      # publishes it under zeke-02).
+      - FOUNT_BROKER_REGISTRY_TOKEN
+    # /health answers as soon as the broker listens, before its harness pull:
+    # Tinfoil's boot gate wants it within about a minute, whatever
+    # start_period says. /status shows the pull and the supervisor; the link
+    # takes jobs only once both are ready.
+    healthcheck:
+      test: ["CMD", "/fount-broker", "health", "http://127.0.0.1:7400/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+
+  - name: supervisor
+    image: "ghcr.io/fount-labs/fount-broker/supervisor@sha256:PLACEHOLDER_DIGEST"
+    # runsc needs it (§5.1b). It has authority over the whole enclave,
+    # including the broker's fount-link key, so its image is open and pinned.
+    cvm_admin: true
+    networks: []
+    restart: always
+    command: ["serve", "--image", "sha256:PLACEHOLDER_HARNESS"]
+    volumes:
+      - harness-blobs:/harness-blobs
+      - sockets:/sockets
+      - jobs:/jobs # each job's folders (--jobs)
+
+shim:
+  upstream-port: 7400
+  upstream-container: broker
+  paths:
+    - /health
+    - /status
+    - /fount-link
