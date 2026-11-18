@@ -20,9 +20,9 @@ networks:
     egress: allowlist
     allow:
       - dev-api.fount.sh # the dev proxy: inference with the job's credential
-      # Each job's broker finds Tinfoil's router before its first model call:
-      # the list from atc, then the first router that verifies, else
-      # inference.tinfoil.sh. The allowlist is IP addresses, and Tinfoil's
+      # The first job finds Tinfoil's router before its first model call: the
+      # list from atc, then the first router that verifies, else
+      # inference.tinfoil.sh. Later jobs reuse its choice until it fails. The allowlist is IP addresses, and Tinfoil's
       # containers share their machine's, so websearch's entry lets these
       # through only while they run on its machine.
       - atc.tinfoil.sh
@@ -37,7 +37,7 @@ networks:
 
 containers:
   - name: broker
-    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:9553473de4ac984f439031bc535c3c2a3fc216b3808a14bbf3f71fd38b303ee6" # v0.5.3, -tags dev
+    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:0c9578f3a56a3a77a9962a7e2cc766545afaee034ac96fe536162ff914961a82" # v0.5.9, -tags dev
     networks: [broker-out]
     keys: [fount-link]
     # The link sends this enclave's document; the coordinator checks it.
