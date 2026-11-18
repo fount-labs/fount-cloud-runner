@@ -20,6 +20,14 @@ networks:
     egress: allowlist
     allow:
       - dev-api.fount.sh # the dev proxy: inference with the job's credential
+      # Each job's broker finds Tinfoil's router before its first model call:
+      # the list from atc, then the first router that verifies, else
+      # inference.tinfoil.sh. The allowlist is IP addresses, and Tinfoil's
+      # containers share their machine's, so websearch's entry lets these
+      # through only while they run on its machine.
+      - atc.tinfoil.sh
+      - router-0.tinfoil.sh
+      - inference.tinfoil.sh
       - websearch.tinfoil.sh
       - ghcr.io # the harness pull
       - pkg-containers.githubusercontent.com
