@@ -41,7 +41,7 @@ networks:
 
 containers:
   - name: broker
-    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:ea45c111b3888071fae905823353177895e192da9e1f5a528071bff124ef2b83" # fount-broker v0.7.0, -tags dev
+    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:472b17f49ac8b2adb112fd7bf860df7e1604609ef11787456411a33b8decb4ec" # fount-broker v0.8.0, -tags dev
     networks: [broker-out]
     keys: [fount-link]
     # The link sends this enclave's document; the coordinator checks it.
@@ -58,6 +58,12 @@ containers:
       - FOUNT_BROKER_PROXY: "https://dev-api.fount.sh"
       - FOUNT_BROKER_FOUNT_API: "https://dev-api.fount.sh"
       - FOUNT_HARNESS_IMAGE: "ghcr.io/fount-labs/fount-runner@sha256:2984c2c42148d6f3c45120644815f0954e0b8a1ae84a1b3d5e206ae83641cee3" # fount-app be741a3e
+      # Bare, so each container's --variable fills it (--name). A team's runner
+      # is runner-dev-tm-<24 hex>, and the coordinator binds it to that team
+      # when it links in. Unmeasured: a host that lies only sends a team's jobs
+      # to another genuine runner, which then serves that team alone. Empty,
+      # as on runner-a, is a pool runner.
+      - FOUNT_RUNNER_NAME
     secrets:
       # Read-only, for the private harness (fount's runner-image workflow
       # publishes it).
@@ -74,7 +80,7 @@ containers:
       start_period: 1m
 
   - name: supervisor
-    image: "ghcr.io/fount-labs/fount-broker/supervisor@sha256:32bc6b6b8c6585b95ef2233043e036a8d49d3dcb65344c54efacac31553ccc14" # fount-broker v0.7.0
+    image: "ghcr.io/fount-labs/fount-broker/supervisor@sha256:a922a7e71aec77738bdede8325da00fe0c6e8db2db264dbdc8b7b422c6949368" # fount-broker v0.8.0
     # runsc needs it (§5.1b). It has authority over the whole enclave,
     # including the broker's fount-link key, so its image is open and pinned.
     cvm_admin: true
