@@ -5,7 +5,7 @@
 # TEST RUNNER from v0.2.0: its broker is the dev build (broker-dev), whose
 # jobs reach the dev proxy (FOUNT_BROKER_PROXY), and it takes jobs only from
 # the test coordinators of fount-labs/fount-cloud-coordinator. Test data only.
-cvm-version: 0.14.18 # https://github.com/tinfoilsh/cvmimage/releases/latest, no `v`
+cvm-version: 0.14.19 # https://github.com/tinfoilsh/cvmimage/releases/latest, no `v`
 cpus: 8
 memory: 32768
 
@@ -37,7 +37,7 @@ networks:
 
 containers:
   - name: broker
-    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:0c9578f3a56a3a77a9962a7e2cc766545afaee034ac96fe536162ff914961a82" # v0.5.9, -tags dev
+    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:9333fa1b2a5805a9e697dde626ba818f72279851bc9dec6e66e4733f85d3912d" # fount-broker v0.6.0, -tags dev
     networks: [broker-out]
     keys: [fount-link]
     # The link sends this enclave's document; the coordinator checks it.
@@ -70,7 +70,7 @@ containers:
       start_period: 1m
 
   - name: supervisor
-    image: "ghcr.io/fount-labs/fount-broker/supervisor@sha256:0a8ef1864f44a5aadf30d7678d0706db70644bffd7d7febdba3cf1fc0ebda374" # v0.5.3
+    image: "ghcr.io/fount-labs/fount-broker/supervisor@sha256:22eb5e9919984e16b64705d920606d31e1b9e99fb52b0cf6ae901fc5ce7e28ac" # fount-broker v0.6.0
     # runsc needs it (§5.1b). It has authority over the whole enclave,
     # including the broker's fount-link key, so its image is open and pinned.
     cvm_admin: true
