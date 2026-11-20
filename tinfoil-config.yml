@@ -31,19 +31,23 @@ networks:
       - websearch.tinfoil.sh
       - ghcr.io # the harness pull
       - pkg-containers.githubusercontent.com
+      # The coordinator: the runner dials in for its jobs (--coordinator), as a
+      # coordinator's measured allowlist can't name a runner that may be
+      # stopped.
+      - coordinator-a.fount.containers.tinfoil.dev
       # Checking the coordinator needs no hosts: a V3 document carries its
       # own collateral (Sigstore bundles, AMD VCEK and CRL, Intel PCS), and
       # tinfoil-go verifies it offline against embedded roots.
 
 containers:
   - name: broker
-    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:9333fa1b2a5805a9e697dde626ba818f72279851bc9dec6e66e4733f85d3912d" # fount-broker v0.6.0, -tags dev
+    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:ea45c111b3888071fae905823353177895e192da9e1f5a528071bff124ef2b83" # fount-broker v0.7.0, -tags dev
     networks: [broker-out]
     keys: [fount-link]
     # The link sends this enclave's document; the coordinator checks it.
     attestation: true
     restart: always
-    command: ["runner", "--listen", "0.0.0.0:7400"]
+    command: ["runner", "--listen", "0.0.0.0:7400", "--coordinator", "https://coordinator-a.fount.containers.tinfoil.dev"]
     volumes:
       - harness-blobs:/harness-blobs
       - sockets:/sockets
@@ -70,7 +74,7 @@ containers:
       start_period: 1m
 
   - name: supervisor
-    image: "ghcr.io/fount-labs/fount-broker/supervisor@sha256:22eb5e9919984e16b64705d920606d31e1b9e99fb52b0cf6ae901fc5ce7e28ac" # fount-broker v0.6.0
+    image: "ghcr.io/fount-labs/fount-broker/supervisor@sha256:32bc6b6b8c6585b95ef2233043e036a8d49d3dcb65344c54efacac31553ccc14" # fount-broker v0.7.0
     # runsc needs it (§5.1b). It has authority over the whole enclave,
     # including the broker's fount-link key, so its image is open and pinned.
     cvm_admin: true
@@ -90,4 +94,4 @@ shim:
   paths:
     - /health
     - /status
-    - /fount-link
+    # No /fount-link: jobs come over links this runner dials.
