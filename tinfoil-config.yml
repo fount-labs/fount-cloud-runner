@@ -57,7 +57,7 @@ containers:
       # only by the dev build (fount-broker internal/policy/endpoints_dev.go).
       - FOUNT_BROKER_PROXY: "https://dev-api.fount.sh"
       - FOUNT_BROKER_FOUNT_API: "https://dev-api.fount.sh"
-      - FOUNT_HARNESS_IMAGE: "ghcr.io/fount-labs/fount-runner@sha256:2984c2c42148d6f3c45120644815f0954e0b8a1ae84a1b3d5e206ae83641cee3" # fount-app be741a3e
+      - FOUNT_HARNESS_IMAGE: "ghcr.io/fount-labs/fount-runner@sha256:db6369c59707b50f2e6d3b9c54eeefed3b4b7244119e647286d5c791286e9120" # fount-app c8f22b52
       # Bare, so each container's --variable fills it (--name). A team's runner
       # is runner-dev-tm-<24 hex>, and the coordinator binds it to that team
       # when it links in. Unmeasured: a host that lies only sends a team's jobs
@@ -88,7 +88,7 @@ containers:
     restart: always
     # 32 at once with 2 cores each is the ramp's ceiling (fount m4-cloud-runners.md
     # §5.2a), not a sizing: the caps overcommit memory on purpose, to find the knee.
-    command: ["serve", "--image", "sha256:2984c2c42148d6f3c45120644815f0954e0b8a1ae84a1b3d5e206ae83641cee3", "--max-jobs", "16", "--cpus", "2"]
+    command: ["serve", "--image", "sha256:db6369c59707b50f2e6d3b9c54eeefed3b4b7244119e647286d5c791286e9120", "--max-jobs", "16", "--cpus", "2"]
     volumes:
       - harness-blobs:/harness-blobs
       - sockets:/sockets
