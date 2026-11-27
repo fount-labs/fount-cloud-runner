@@ -41,7 +41,7 @@ networks:
 
 containers:
   - name: broker
-    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:472b17f49ac8b2adb112fd7bf860df7e1604609ef11787456411a33b8decb4ec" # fount-broker v0.8.0, -tags dev
+    image: "ghcr.io/fount-labs/fount-broker/broker-dev@sha256:3eed8a0a9580d4430b7df74b3cf0215da218966f18caed94c1b4ea296db7b8ef" # fount-broker v0.9.1, -tags dev
     networks: [broker-out]
     keys: [fount-link]
     # The link sends this enclave's document; the coordinator checks it.
